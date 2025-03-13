@@ -1,0 +1,62 @@
+/* Container */
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #1e1e2f;
+    color: white;
+    overflow-y: auto; /* Enables scrolling for small vertical screens */
+}
+
+/* Header */
+.home-container h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.home-container p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Buttons Row */
+.home-buttons {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    gap: 20px; /* Adds space between buttons */
+}
+
+/* Button Styles */
+.home-buttons button {
+    flex: 1; /* Equal width for both buttons */
+    padding: 15px;
+    border-radius: 30px;
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.home-buttons button:hover {
+    background-color: #0097a7;
+}
+
+/* Responsive Adjustments */
+@media (max-height: 600px) {
+    .home-container {
+        padding: 10px;
+    }
+
+    .home-buttons button {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}

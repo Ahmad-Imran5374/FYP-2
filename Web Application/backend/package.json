@@ -1,0 +1,37 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "IOT device detection to prevent cyber Attack",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zakiqasim100/iot-attack-guard.git"
+  },
+  "keywords": [
+    "Cyber",
+    "Security"
+  ],
+  "author": "Ahmad, Zaki, Abdur Rehman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zakiqasim100/iot-attack-guard/issues"
+  },
+  "homepage": "https://github.com/zakiqasim100/iot-attack-guard#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "moongose": "^1.0.0",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

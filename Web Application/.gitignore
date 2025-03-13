@@ -1,0 +1,68 @@
+# Node.js / Backend
+###################
+# Ignore node_modules in the backend
+/backend/node_modules/
+# Ignore environment variable files in the backend
+/backend/.env
+/backend/.env.local
+/backend/.env.*.local
+
+# Ignore logs in the backend
+/backend/*.log
+/backend/**/*.log
+
+# Ignore build output (if applicable)
+backend/dist/
+
+# Ignore other backend-related temporary files
+/backend/tmp/
+
+# Frontend (React)
+##################
+# Ignore node_modules in the frontend
+/frontend/node_modules/
+# Ignore environment variable files in the frontend
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+
+# Ignore build output (React build folder)
+/frontend/build/
+frontend/dist/
+
+# Ignore temporary files for frontend
+/frontend/.cache/
+frontend/public/build/
+
+# IDE/Editor-specific files
+############################
+# Visual Studio Code settings
+.vscode/
+
+# IntelliJ IDEA / JetBrains project files
+.idea/
+
+# Sublime Text project files
+*.sublime-project
+*.sublime-workspace
+
+# macOS system files
+####################
+.DS_Store
+
+# Windows system files
+######################
+Thumbs.db
+
+# Log files
+###################
+*.log
+npm-debug.log
+yarn-error.log
+
+# Optional: ignore archive files
+###############################
+*.tar.gz
+*.zip
+*.rar
+*.7z
