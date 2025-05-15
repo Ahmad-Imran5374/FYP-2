@@ -10,6 +10,7 @@
     "react-router-dom": "^7.5.2",
     "react-scripts": "5.0.1",
     "rimraf": "^6.0.1",
+    "socket.io-client": "^4.8.1",
     "switch": "^0.0.0"
   },
   "scripts": {

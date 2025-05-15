@@ -1,28 +1,34 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import io from "socket.io-client";
 import "./dashBoard.css";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const socket = io(API_BASE, { transports: ["websocket"] });
+
 function Dashboard() {
-  const [user, setUser] = useState(null);
+  const [user, setUser]         = useState(null);
   const [activeOption, setActiveOption] = useState("Scan IoT Devices");
   const [sidebarVisible, setSidebarVisible] = useState(true);
 
-  useEffect(() => {
-    // Fetch user data from the backend
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5000/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(response.data);
-      } catch (error) {
-        alert(error.response?.data?.error || "Failed to load user data.");
-        window.location.href = "/login"; // Redirect to login if not authenticated
-      }
-    };
+  const [isScanning, setIsScanning] = useState(false);
+  const [packets, setPackets]       = useState([]);
+  const [error, setError]           = useState("");
 
-    fetchUserData();
+  useEffect(() => {
+    // Fetch user profile
+    axios.get("/dashboard", {
+      baseURL: API_BASE,
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+    .then(res => setUser(res.data))
+    .catch(() => window.location.href = "/login");
+
+    // Listen for incoming packets
+    socket.on("new-packet", pkt => {
+      setPackets(prev => [pkt, ...prev].slice(0, 200));
+    });
+    return () => socket.off("new-packet");
   }, []);
 
   const handleLogout = () => {
@@ -30,115 +36,105 @@ function Dashboard() {
     window.location.href = "/login";
   };
 
-  const renderContent = () => {
-    switch (activeOption) {
-      case "Scan IoT Devices":
-        return (
-          <div className="center-content">
-            <h3>Scan IoT Devices</h3>
-            <button className="scan-now-button">Scan Now</button>
-          </div>
-        );
-      case "Block IoT Devices":
-        return (
-          <div className="center-content">
-            <h3>Block IoT Devices</h3>
-          </div>
-        );
-      case "Unblock IoT Devices":
-        return (
-          <div className="center-content">
-            <h3>Unblock IoT Devices</h3>
-          </div>
-        );
-      case "Alerts":
-        return (
-          <div className="center-content">
-            <h3>Alerts</h3>
-          </div>
-        );
-      case "Activity Log":
-        return (
-          <div className="center-content">
-            <h3>Activity Log</h3>
-          </div>
-        );
-      case "Detailed IoT Device Info":
-        return (
-          <div className="center-content">
-            <h3>Detailed IoT Device Info</h3>
-          </div>
-        );
-      default:
-        return <div className="center-content">Select an option</div>;
+  const handleScanToggle = async () => {
+    setError("");
+    try {
+      const url = isScanning ? "/stop-scan" : "/start-scan";
+      await axios.post(url, {}, {
+        baseURL: API_BASE,
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
+      setIsScanning(v => !v);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
     }
   };
 
+  const renderScanView = () => (
+    <div className="scan-view">
+      <h3>Scan IoT Devices</h3>
+      <button className={`scan-button ${isScanning ? "stop" : "start"}`}
+              onClick={handleScanToggle}>
+        {isScanning ? "Stop Scan" : "Scan Now"}
+      </button>
+      {error && <p className="error-text">Error: {error}</p>}
+
+      <div className="packet-container">
+        <table className="packet-table">
+          <thead>
+            <tr>
+              <th>Src IP</th>
+              <th>Src Port</th>
+              <th>Dst IP</th>
+              <th>Dst Port</th>
+              <th>Device</th>
+              <th>Label</th>
+            </tr>
+          </thead>
+          <tbody>
+            {packets.map((p, i) => (
+              <tr key={i}>
+                <td>{p.src_ip}</td>
+                <td>{p.src_port}</td>
+                <td>{p.dst_ip}</td>
+                <td>{p.dst_port}</td>
+                <td>{p.device_type}</td>
+                <td className={p.attack_label === 1 ? "malicious" : "normal"}>
+                  {p.attack_label === 1 ? "Malicious" : "Normal"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  if (!user) {
+    return <div className="loading">Loading user data…</div>;
+  }
+
   return (
     <div className="dashboard-container">
-      <div className={`sidebar ${sidebarVisible ? "visible" : "hidden"}`}>
+      <aside className={`sidebar ${sidebarVisible ? "visible" : "hidden"}`}>
         <h3>Dashboard</h3>
         <ul>
-          <li
-            className={activeOption === "Scan IoT Devices" ? "active" : ""}
-            onClick={() => setActiveOption("Scan IoT Devices")}
-          >
-            Scan IoT Devices
-          </li>
-          <li
-            className={activeOption === "Block IoT Devices" ? "active" : ""}
-            onClick={() => setActiveOption("Block IoT Devices")}
-          >
-            Block IoT Devices
-          </li>
-          <li
-            className={activeOption === "Unblock IoT Devices" ? "active" : ""}
-            onClick={() => setActiveOption("Unblock IoT Devices")}
-          >
-            Unblock IoT Devices
-          </li>
-          <li
-            className={activeOption === "Alerts" ? "active" : ""}
-            onClick={() => setActiveOption("Alerts")}
-          >
-            Alerts
-          </li>
-          <li
-            className={activeOption === "Activity Log" ? "active" : ""}
-            onClick={() => setActiveOption("Activity Log")}
-          >
-            Activity Log
-          </li>
-          <li
-            className={activeOption === "Detailed IoT Device Info" ? "active" : ""}
-            onClick={() => setActiveOption("Detailed IoT Device Info")}
-          >
-            Detailed IoT Device Info
-          </li>
+          {[
+            "Scan IoT Devices",
+            "Block IoT Devices",
+            "Unblock IoT Devices",
+            "Alerts",
+            "Activity Log",
+            "Detailed IoT Device Info",
+          ].map(opt => (
+            <li key={opt}
+                className={activeOption === opt ? "active" : ""}
+                onClick={() => setActiveOption(opt)}>
+              {opt}
+            </li>
+          ))}
         </ul>
-      </div>
-      <div className="main-content">
-        <header>
-          <button
-            className="sidebar-toggle"
-            onClick={() => setSidebarVisible(!sidebarVisible)}
-          >
-            ☰
-          </button>
-          {user ? (
-            <div>
-              {/* Extract username before the "@" symbol */}
-              <h2>Welcome, {user.email.split("@")[0]}!</h2>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          ) : (
-            <p>Loading user data...</p>
-          )}
+      </aside>
+
+      <main className="main-content">
+        <header className="top-bar">
+          <button onClick={() => setSidebarVisible(v => !v)}
+                  className="sidebar-toggle">☰</button>
+          <div className="user-block">
+            <span>Welcome, {user.email.split("@")[0]}!</span>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
+          </div>
         </header>
-        {renderContent()}
-      </div>
+
+        <section className="content">
+          {activeOption === "Scan IoT Devices"
+            ? renderScanView()
+            : <div className="center-content">Select an option</div>
+          }
+        </section>
+      </main>
     </div>
   );
 }
