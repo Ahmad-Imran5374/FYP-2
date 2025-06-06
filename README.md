@@ -1,1 +1,1 @@
-![Project Poster](docs/poster/F24-9.jpg)
+![Project Poster](documentation/poster/F24-9.jpg)
